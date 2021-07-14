@@ -67,6 +67,9 @@ server.post('/addbook',addBookHandler);
 //http://localhost:3003/deletebook/1?userEnail=sehammalkawi92@gmail.com
 server.delete('/deletebook/:bookId',deleteBookHandler);
 
+// localhost:3001/updateBook/1
+server.put('/updateBook/:bookID',updateBookHandler);
+
 function handelProofOfLifeRoute(request, response) {
     
     response.send('every thing is working')
@@ -95,7 +98,7 @@ function addBookHandler(req,res){
         // console.log(userData);
         if (error){res.send(error,'did not find useremail')}
         else{
-            console.log('befor adding book',userData);
+            // console.log('befor adding book',userData);
             userData[0].books.push(
                 {
                     name:bookName,
@@ -105,7 +108,7 @@ function addBookHandler(req,res){
 
                 }
             )
-             console.log('after adding',userData[0])
+            //  console.log('after adding',userData[0])
             userData[0].save()
             res.send(userData[0].books)
     }
@@ -116,8 +119,8 @@ function addBookHandler(req,res){
 
 
 function deleteBookHandler(req,res){
- console.log(req.params);
- console.log(req.query);
+//  console.log(req.params);
+//  console.log(req.query);
 let index=Number(req.params.bookId);
 let userEmail = req.query.email;
 
@@ -128,13 +131,44 @@ let bookArrayAfterDelete=userData[0].books.filter((book,idx)=>{
     if(idx !== index){return book}
 })
 userData[0].books=bookArrayAfterDelete
-console.log('after deletion',userData[0].books)
+// console.log('after deletion',userData[0].books)
 userData[0].save();
 res.send(userData[0].books)
 }
 })
 
 }
+// -----------------------------function for update data-----------------
+
+function updateBookHandler(req,res){
+    //  console.log('aaaaaa',req.body);
+    //  console.log('aaaaaa',req.params);
+    let { userEmail,bookName,description,status,img } =req.body
+    let index=Number(req.params.bookId);
+    userModel.findOne({email:userEmail},(error,userData)=>{
+        if(error) res.send('error in finding the data')
+        else {
+            console.log(userData.books,'ooooooooooooo')
+            userData.books.splice(index,1,{
+                name:bookName,
+                description:description,
+                status:status,
+                img:img
+
+            })
+            // console.log(userData)
+            userData.save();
+            res.send(userData.books)
+            
+        }
+    })
+
+
+}
+
+
+
+
 
 server.listen(PORT, () => {
     console.log(`Listening on PORT ${PORT}`)
